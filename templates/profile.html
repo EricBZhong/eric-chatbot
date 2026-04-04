@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}My Profile - Eric-Chatbot{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <span>Loading profile...</span>
+</div>
+
+<div id="profile-content" style="display:none;">
+    <!-- Personality Card -->
+    <div id="personality-card" class="profile-personality-card">
+        <div class="profile-title" id="profile-title">Loading...</div>
+        <div class="profile-summary" id="profile-summary"></div>
+        <div class="profile-zodiac" id="profile-zodiac"></div>
+    </div>
+
+    <!-- Global HUD Stats -->
+    <div class="section-title">YOUR NUMBERS</div>
+    <div class="hud" id="profile-hud"></div>
+
+    <!-- Stats Grid -->
+    <div class="section-title">STATS</div>
+    <div class="stats-grid" id="profile-stats-grid"></div>
+
+    <!-- Character Sheet -->
+    <div class="section-title">CHARACTER SHEET</div>
+    <div class="character-cards" id="profile-character" style="grid-template-columns: 1fr; max-width:500px;"></div>
+
+    <!-- Busiest Hours Chart -->
+    <div class="section-title">BUSIEST HOURS</div>
+    <div class="card" style="margin-bottom:32px;">
+        <canvas id="hours-chart" height="200"></canvas>
+    </div>
+
+    <!-- Communication Style -->
+    <div id="profile-comm-style"></div>
+
+    <!-- Strengths / Growth Areas -->
+    <div id="profile-flags"></div>
+
+    <!-- Fun Facts -->
+    <div class="section-title">FUN FACTS</div>
+    <div class="profile-facts" id="profile-facts"></div>
+
+    <!-- Who You Are -->
+    <div class="section-title">WHO YOU ARE</div>
+    <div class="profile-who" id="profile-who"></div>
+
+    <!-- Refresh -->
+    <div style="text-align:center; margin-top:16px;">
+        <button class="btn pink" onclick="refreshProfile()" id="profile-refresh-btn">REFRESH PROFILE ANALYSIS</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/profile.js"></script>
+{% endblock %}

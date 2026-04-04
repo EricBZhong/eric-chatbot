@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Journal - Eric-Chatbot{% endblock %}
+
+{% block content %}
+<div class="journal-container">
+    <div class="section-title">CONTEXT JOURNAL</div>
+
+    <div class="journal-prompts" id="prompts-section">
+        <h3 style="font-family:var(--font-display); font-size:0.75rem; letter-spacing:2px; color:var(--text-secondary); margin-bottom:12px;">
+            AI-GENERATED PROMPTS
+        </h3>
+        <div id="prompts-loading" class="loading">
+            <div class="loading-spinner"></div>
+            <span>Generating prompts...</span>
+        </div>
+        <div id="prompts-list"></div>
+    </div>
+
+    <div style="margin-bottom:8px;">
+        <span id="selected-prompt" style="font-size:0.85rem; color:var(--neon-purple); font-style:italic;"></span>
+    </div>
+    <textarea class="journal-textarea" id="journal-input" placeholder="Write about your in-person interactions, dates, hangouts, feelings..."></textarea>
+    <div style="display:flex; justify-content:flex-end;">
+        <button class="btn green" onclick="saveEntry()" id="save-btn">SAVE ENTRY</button>
+    </div>
+
+    <div class="journal-entries" id="entries-section">
+        <div class="section-title" style="margin-top:32px;">PAST ENTRIES</div>
+        <div id="entries-list"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/journal.js"></script>
+{% endblock %}

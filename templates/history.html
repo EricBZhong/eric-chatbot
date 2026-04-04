@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}History - Eric-Chatbot{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <span>Loading history...</span>
+</div>
+
+<div id="history-content" style="display:none;">
+    <div class="section-title">ANALYSIS TRENDS</div>
+    <div class="card" style="margin-bottom:32px;">
+        <canvas id="trend-chart" height="250"></canvas>
+    </div>
+
+    <div class="section-title">SCORE BREAKDOWN</div>
+    <div class="history-scores-grid" id="score-cards"></div>
+
+    <div class="section-title">ANALYSIS TIMELINE</div>
+    <div id="timeline"></div>
+
+    <div id="detail-modal" class="history-modal" style="display:none;">
+        <div class="history-modal-content">
+            <button class="history-modal-close" onclick="closeDetail()">&times;</button>
+            <div id="detail-body"></div>
+        </div>
+    </div>
+</div>
+
+<div id="no-history" style="display:none; text-align:center; padding:60px 20px;">
+    <div style="color:var(--text-dim); font-size:1.1rem; margin-bottom:12px;">No analysis history yet.</div>
+    <div style="color:var(--text-secondary); font-size:0.9rem;">Run an AI analysis from the Dashboard to start tracking trends.</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/history.js"></script>
+{% endblock %}

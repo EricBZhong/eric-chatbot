@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Insights - Eric-Chatbot{% endblock %}
+
+{% block content %}
+<div class="insights-container">
+    <div class="section-title">INSIGHT ENGINE</div>
+
+    <div class="insight-examples">
+        <h3>EXAMPLE QUESTIONS</h3>
+        <div class="example-questions">
+            <div class="example-q" onclick="askExample(this)">Am I being too clingy?</div>
+            <div class="example-q" onclick="askExample(this)">Do they seem interested?</div>
+            <div class="example-q" onclick="askExample(this)">Who puts in more effort?</div>
+            <div class="example-q" onclick="askExample(this)">What topics do they respond best to?</div>
+            <div class="example-q" onclick="askExample(this)">When is the best time to text them?</div>
+            <div class="example-q" onclick="askExample(this)">Am I double texting too much?</div>
+        </div>
+    </div>
+
+    <div class="insight-input-area">
+        <input type="text" id="insight-input" placeholder="Ask anything about your conversation..."
+               onkeydown="if(event.key==='Enter')askInsight()">
+        <button class="btn" onclick="askInsight()" id="ask-btn">ASK</button>
+    </div>
+
+    <div id="insight-loading" class="loading" style="display:none;">
+        <div class="loading-spinner"></div>
+        <span>Analyzing...</span>
+    </div>
+
+    <div id="insight-response" class="insight-response" style="display:none;"></div>
+
+    <div id="insight-history" style="margin-top:32px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/insights.js"></script>
+{% endblock %}

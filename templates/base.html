@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Eric-Chatbot{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <div class="nav-brand" id="app-brand">CHATBOT</div>
+        <div class="nav-center">
+            <select id="contact-selector" class="contact-selector" onchange="onContactChange()">
+                <option value="">Loading contacts...</option>
+            </select>
+            <button class="add-contact-btn" onclick="openAddContact()" title="Add new contact">+</button>
+        </div>
+        <div class="nav-links">
+            <a href="/" id="nav-dashboard">DASHBOARD</a>
+            <a href="/insights" id="nav-insights">INSIGHTS</a>
+            <a href="/chat" id="nav-chat">CLONE CHAT</a>
+            <a href="/journal" id="nav-journal">JOURNAL</a>
+            <a href="/history" id="nav-history">HISTORY</a>
+            <a href="/profile" id="nav-profile">MY PROFILE</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div id="add-contact-modal" class="add-contact-modal" style="display:none;" onclick="if(event.target===this)closeAddContact()">
+        <div class="add-contact-modal-content">
+            <button class="add-contact-modal-close" onclick="closeAddContact()">&times;</button>
+            <h2 class="add-contact-title">ADD NEW CONTACT</h2>
+
+            <div class="add-contact-tabs">
+                <button class="add-contact-tab active" onclick="switchTab('upload')" id="tab-upload">UPLOAD FILE</button>
+                <button class="add-contact-tab" onclick="switchTab('imessage')" id="tab-imessage">IMPORT iMESSAGE</button>
+            </div>
+
+            <div id="panel-upload" class="add-contact-panel">
+                <p class="add-contact-desc">Upload a conversation export file (.txt) from imessage-exporter or any compatible format.</p>
+                <div class="add-contact-form">
+                    <label class="add-contact-label">Display Name (optional)</label>
+                    <input type="text" id="upload-name" class="add-contact-input" placeholder="e.g. Alex, Mom, etc.">
+
+                    <div style="display:flex; gap:12px; margin-top:4px;">
+                        <div style="flex:1;">
+                            <label class="add-contact-label">Gender</label>
+                            <select id="upload-gender" class="add-contact-input" style="cursor:pointer;">
+                                <option value="auto">Auto-detect</option>
+                                <option value="he/him">He/Him</option>
+                                <option value="she/her">She/Her</option>
+                                <option value="they/them">They/Them</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;">
+                            <label class="add-contact-label">Category</label>
+                            <select id="upload-category" class="add-contact-input" style="cursor:pointer;">
+                                <option value="auto">Auto-detect</option>
+                                <option value="romantic_interest">Romantic Interest</option>
+                                <option value="casual_interest">Casual Interest</option>
+                                <option value="close_friend">Close Friend</option>
+                                <option value="new_friend">New Friend</option>
+                                <option value="coworker">Coworker</option>
+                                <option value="family_parent">Parent</option>
+                                <option value="family_sibling">Sibling</option>
+                                <option value="ex">Ex</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="add-contact-label">Conversation File (.txt)</label>
+                    <div class="file-drop-zone" id="file-drop-zone" onclick="document.getElementById('file-input').click()">
+                        <input type="file" id="file-input" accept=".txt" style="display:none" onchange="onFileSelected(this)">
+                        <div class="file-drop-icon">+</div>
+                        <div class="file-drop-text" id="file-drop-text">Click to choose file or drag & drop</div>
+                    </div>
+
+                    <button class="btn pink" onclick="uploadFile()" id="upload-btn" disabled style="width:100%; margin-top:16px;">UPLOAD & ADD CONTACT</button>
+                </div>
+            </div>
+
+            <div id="panel-imessage" class="add-contact-panel" style="display:none;">
+                <p class="add-contact-desc">Import a specific conversation from iMessage by phone number, email, or contact name.</p>
+
+                <label class="add-contact-label">Contact (phone, email, or name)</label>
+                <input type="text" id="imessage-filter" class="add-contact-input" placeholder="e.g. +15558675309, steve@apple.com, John" oninput="toggleImessageButtons()">
+
+                <div style="display:flex; gap:12px; margin-top:4px;">
+                    <div style="flex:1;">
+                        <label class="add-contact-label">Gender</label>
+                        <select id="imessage-gender" class="add-contact-input" style="cursor:pointer;">
+                            <option value="auto">Auto-detect</option>
+                            <option value="he/him">He/Him</option>
+                            <option value="she/her">She/Her</option>
+                            <option value="they/them">They/Them</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;">
+                        <label class="add-contact-label">Category</label>
+                        <select id="imessage-category" class="add-contact-input" style="cursor:pointer;">
+                            <option value="auto">Auto-detect</option>
+                            <option value="romantic_interest">Romantic Interest</option>
+                            <option value="casual_interest">Casual Interest</option>
+                            <option value="close_friend">Close Friend</option>
+                            <option value="new_friend">New Friend</option>
+                            <option value="coworker">Coworker</option>
+                            <option value="family_parent">Parent</option>
+                            <option value="family_sibling">Sibling</option>
+                            <option value="ex">Ex</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn pink" onclick="importSingleFromModal()" id="modal-import-single-btn" disabled style="width:100%; margin-top:16px;">IMPORT THIS CONTACT</button>
+
+                <div style="display:flex; align-items:center; gap:12px; margin:16px 0 8px;">
+                    <div style="flex:1; height:1px; background:rgba(255,255,255,0.06);"></div>
+                    <span style="font-family:var(--font-display); font-size:0.6rem; letter-spacing:2px; color:var(--text-dim);">OR</span>
+                    <div style="flex:1; height:1px; background:rgba(255,255,255,0.06);"></div>
+                </div>
+
+                <button class="btn" onclick="importFromModal()" id="modal-import-btn" style="width:100%;">IMPORT ALL CONVERSATIONS</button>
+                <p class="add-contact-note">Requires Full Disk Access permission for Terminal.</p>
+
+                <!-- Full Disk Access guide (hidden by default) -->
+                <div id="fda-guide" class="fda-guide" style="display:none;">
+                    <h3>Full Disk Access Required</h3>
+                    <p>Your Mac needs to give this app permission to read iMessage data. Here's how:</p>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> (click the Apple menu &rarr; System Settings)</li>
+                        <li>Go to <strong>Privacy & Security</strong> &rarr; <strong>Full Disk Access</strong></li>
+                        <li>Click the <strong>+</strong> button and add <strong>Terminal</strong> (in Applications &rarr; Utilities)</li>
+                        <li>Toggle it <strong>ON</strong></li>
+                        <li>Close and re-open the app, then try importing again</li>
+                    </ol>
+                    <p style="font-size:0.85em; opacity:0.7;">If you launched from start.command, add "Terminal.app". If you use iTerm, add "iTerm.app" instead.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Global Contact Helpers ---
+        function getSelectedContact() {
+            return localStorage.getItem('selectedContact') || '';
+        }
+
+        function withContact(url) {
+            const contact = getSelectedContact();
+            if (!contact) return url;
+            const sep = url.includes('?') ? '&' : '?';
+            return url + sep + 'contact=' + encodeURIComponent(contact);
+        }
+
+        function onContactChange() {
+            const selector = document.getElementById('contact-selector');
+            const value = selector.value;
+            if (value) {
+                localStorage.setItem('selectedContact', value);
+                location.reload();
+            }
+        }
+
+        async function loadContacts() {
+            const selector = document.getElementById('contact-selector');
+            try {
+                const res = await fetch('/api/contacts');
+                const data = await res.json();
+                const contacts = data.contacts || [];
+
+                if (contacts.length === 0) {
+                    selector.innerHTML = '<option value="">No contacts — import messages first</option>';
+                    return;
+                }
+
+                const saved = getSelectedContact();
+                selector.innerHTML = contacts.map(c => {
+                    const selected = c.phone_number === saved ? 'selected' : '';
+                    return `<option value="${c.phone_number}" ${selected}>${c.display_name} (${c.message_count} msgs)</option>`;
+                }).join('');
+
+                // Auto-select first if nothing saved
+                if (!saved || !contacts.find(c => c.phone_number === saved)) {
+                    localStorage.setItem('selectedContact', contacts[0].phone_number);
+                    selector.value = contacts[0].phone_number;
+                }
+            } catch (e) {
+                selector.innerHTML = '<option value="">Error loading contacts</option>';
+            }
+        }
+
+        // Highlight active nav link
+        const path = window.location.pathname;
+        document.querySelectorAll('.nav-links a').forEach(a => {
+            if (a.getAttribute('href') === path) {
+                a.classList.add('active');
+            }
+        });
+
+        function getUserName() {
+            return localStorage.getItem('userName') || 'Me';
+        }
+
+        async function loadUserProfile() {
+            try {
+                const res = await fetch('/api/profile');
+                const data = await res.json();
+                if (data.name && data.name !== 'Me') {
+                    localStorage.setItem('userName', data.name);
+                    document.getElementById('app-brand').textContent = data.name.toUpperCase() + "'S CHATBOT";
+                }
+            } catch (e) {
+                // Silent
+            }
+        }
+
+        // --- Add Contact Modal ---
+        function openAddContact() {
+            document.getElementById('add-contact-modal').style.display = 'flex';
+        }
+
+        function closeAddContact() {
+            document.getElementById('add-contact-modal').style.display = 'none';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.add-contact-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.add-contact-panel').forEach(p => p.style.display = 'none');
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('panel-' + tab).style.display = 'block';
+        }
+
+        function onFileSelected(input) {
+            const file = input.files[0];
+            if (file) {
+                document.getElementById('file-drop-text').textContent = file.name;
+                document.getElementById('file-drop-zone').style.borderColor = 'var(--neon-green)';
+                document.getElementById('upload-btn').disabled = false;
+            }
+        }
+
+        // Drag and drop support
+        const dropZone = document.getElementById('file-drop-zone');
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = 'var(--neon-pink)';
+                    dropZone.style.background = 'rgba(255, 0, 170, 0.05)';
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, e => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = '';
+                    dropZone.style.background = '';
+                });
+            });
+            dropZone.addEventListener('drop', e => {
+                const file = e.dataTransfer.files[0];
+                if (file && file.name.endsWith('.txt')) {
+                    document.getElementById('file-input').files = e.dataTransfer.files;
+                    document.getElementById('file-drop-text').textContent = file.name;
+                    document.getElementById('file-drop-zone').style.borderColor = 'var(--neon-green)';
+                    document.getElementById('upload-btn').disabled = false;
+                }
+            });
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('file-input');
+            const nameInput = document.getElementById('upload-name');
+            const btn = document.getElementById('upload-btn');
+
+            if (!fileInput.files[0]) return;
+
+            btn.disabled = true;
+            btn.textContent = 'UPLOADING...';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('name', nameInput.value.trim());
+            formData.append('gender', document.getElementById('upload-gender').value);
+            formData.append('category', document.getElementById('upload-category').value);
+
+            try {
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.error) {
+                    btn.textContent = 'ERROR';
+                    alert(data.error);
+                    setTimeout(() => { btn.textContent = 'UPLOAD & ADD CONTACT'; btn.disabled = false; }, 2000);
+                    return;
+                }
+
+                // Select the new contact and reload
+                localStorage.setItem('selectedContact', data.contact_id);
+                location.reload();
+            } catch (e) {
+                btn.textContent = 'ERROR';
+                setTimeout(() => { btn.textContent = 'UPLOAD & ADD CONTACT'; btn.disabled = false; }, 2000);
+            }
+        }
+
+        function toggleImessageButtons() {
+            const filter = document.getElementById('imessage-filter').value.trim();
+            document.getElementById('modal-import-single-btn').disabled = !filter;
+        }
+
+        async function importSingleFromModal() {
+            const btn = document.getElementById('modal-import-single-btn');
+            const fdaGuide = document.getElementById('fda-guide');
+            const filter = document.getElementById('imessage-filter').value.trim();
+            if (!filter) return;
+
+            btn.disabled = true;
+            btn.textContent = 'IMPORTING...';
+            if (fdaGuide) fdaGuide.style.display = 'none';
+            console.log('[import] Starting single-contact import for:', filter);
+
+            try {
+                const imGender = document.getElementById('imessage-gender').value;
+                const imCategory = document.getElementById('imessage-category').value;
+                const res = await fetch('/api/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filter, gender: imGender, category: imCategory }),
+                });
+                const data = await res.json();
+                console.log('[import] Response:', data);
+
+                if (data.error === 'full_disk_access') {
+                    btn.textContent = 'PERMISSION NEEDED';
+                    if (fdaGuide) fdaGuide.style.display = 'block';
+                    setTimeout(() => { btn.textContent = 'IMPORT THIS CONTACT'; btn.disabled = false; }, 3000);
+                    return;
+                }
+
+                if (data.error) {
+                    btn.textContent = 'ERROR';
+                    alert(typeof data.error === 'string' ? data.error : data.message || 'Import failed');
+                    setTimeout(() => { btn.textContent = 'IMPORT THIS CONTACT'; btn.disabled = false; }, 2000);
+                    return;
+                }
+
+                if (data.no_match) {
+                    console.log('[import] No matching contact found for filter:', filter);
+                    btn.textContent = 'NO MATCH FOUND';
+                    setTimeout(() => { btn.textContent = 'IMPORT THIS CONTACT'; btn.disabled = false; }, 2000);
+                    return;
+                }
+
+                if (data.messages_parsed > 0) {
+                    // Select the newly imported contact
+                    if (data.selected_contact) {
+                        console.log('[import] Selecting new contact:', data.selected_contact);
+                        localStorage.setItem('selectedContact', data.selected_contact);
+                    }
+                    location.reload();
+                } else {
+                    btn.textContent = 'NO MESSAGES FOUND';
+                    setTimeout(() => { btn.textContent = 'IMPORT THIS CONTACT'; btn.disabled = false; }, 2000);
+                }
+            } catch (e) {
+                console.error('[import] Error:', e);
+                btn.textContent = 'ERROR';
+                setTimeout(() => { btn.textContent = 'IMPORT THIS CONTACT'; btn.disabled = false; }, 2000);
+            }
+        }
+
+        async function importFromModal() {
+            const btn = document.getElementById('modal-import-btn');
+            const fdaGuide = document.getElementById('fda-guide');
+            btn.disabled = true;
+            btn.textContent = 'IMPORTING...';
+            if (fdaGuide) fdaGuide.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                });
+                const data = await res.json();
+
+                if (data.error === 'full_disk_access') {
+                    btn.textContent = 'PERMISSION NEEDED';
+                    if (fdaGuide) fdaGuide.style.display = 'block';
+                    setTimeout(() => { btn.textContent = 'IMPORT ALL CONVERSATIONS'; btn.disabled = false; }, 3000);
+                    return;
+                }
+
+                if (data.error) {
+                    btn.textContent = 'ERROR';
+                    alert(typeof data.error === 'string' ? data.error : data.message || 'Import failed');
+                    setTimeout(() => { btn.textContent = 'IMPORT ALL CONVERSATIONS'; btn.disabled = false; }, 2000);
+                    return;
+                }
+
+                if (data.messages_parsed > 0) {
+                    location.reload();
+                } else {
+                    btn.textContent = 'NO MESSAGES FOUND';
+                    setTimeout(() => { btn.textContent = 'IMPORT ALL CONVERSATIONS'; btn.disabled = false; }, 2000);
+                }
+            } catch (e) {
+                btn.textContent = 'ERROR';
+                setTimeout(() => { btn.textContent = 'IMPORT ALL CONVERSATIONS'; btn.disabled = false; }, 2000);
+            }
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeAddContact();
+        });
+
+        // Load contacts and profile on every page
+        loadContacts();
+        loadUserProfile();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

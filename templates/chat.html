@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Clone Chat - Eric-Chatbot{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="card-title" id="clone-name">CLONE CHAT</div>
+        <div id="clone-info" style="font-size:0.85rem; color:var(--text-secondary);"></div>
+        <div class="chat-disclaimer">
+            This is an AI simulation for practice only. Not a real person.<br>
+            This feature is experimental and may not accurately reflect how they text.
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+        <div class="chat-placeholder" style="text-align:center; color:var(--text-dim); padding:40px; font-size:0.9rem;">
+            Start a conversation. The AI will respond in their texting style.
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Type a message..."
+               onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="btn pink" onclick="sendMessage()" id="send-btn">SEND</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/chat.js"></script>
+{% endblock %}

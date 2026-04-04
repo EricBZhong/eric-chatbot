@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Eric-Chatbot{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div id="parse-banner" class="parse-banner" style="display:none;">
+    <span class="parse-banner-text">No messages loaded. Import from iMessage or parse exported files.</span>
+    <div class="parse-banner-actions">
+        <button class="btn" id="import-btn" onclick="importMessages()">IMPORT FROM iMESSAGE</button>
+        <button class="btn btn-parse" onclick="parseMessages()" style="margin-left:8px;">PARSE FILES</button>
+    </div>
+</div>
+
+<div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <span>Loading stats...</span>
+</div>
+
+<div id="dashboard-content" style="display:none;">
+    <!-- Relationship HUD -->
+    <div class="hud" id="hud"></div>
+
+    <!-- Character Cards -->
+    <div class="section-title">CHARACTER SHEETS</div>
+    <div class="character-cards" id="character-cards"></div>
+
+    <!-- Achievements -->
+    <div class="section-title">ACHIEVEMENTS</div>
+    <div class="achievements" id="achievements"></div>
+
+    <!-- Stats Grid -->
+    <div class="section-title">STATS</div>
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- Weekly Trend Chart -->
+    <div class="section-title">MESSAGE TRENDS</div>
+    <div class="card" style="margin-bottom:32px;">
+        <canvas id="trend-chart" height="200"></canvas>
+    </div>
+
+    <!-- What Should I Do? -->
+    <div class="section-title">WHAT SHOULD I DO?</div>
+    <div id="next-move-panel"></div>
+    <div style="text-align:center; margin-bottom:32px;">
+        <button class="btn pink" onclick="getNextMove()" id="next-move-btn">WHAT'S MY MOVE?</button>
+    </div>
+
+    <!-- Flags -->
+    <div class="section-title">ANALYSIS</div>
+    <div id="analysis-loading" class="loading" style="display:none;">
+        <div class="loading-spinner"></div>
+        <span>Running Claude analysis...</span>
+    </div>
+    <div id="analysis-content" style="display:none;">
+        <div class="flags-container" id="flags"></div>
+
+        <!-- Attachment Styles -->
+        <div class="section-title">ATTACHMENT STYLES</div>
+        <div id="attachment-styles"></div>
+        <div class="attachment-override" id="attachment-override">
+            <span style="color:var(--text-secondary); font-size:0.85rem;">Think the AI got your style wrong? Set it yourself:</span>
+            <select id="my-attachment-style" class="attachment-select" onchange="setMyAttachmentStyle()">
+                <option value="">Auto-detect</option>
+                <option value="secure">Secure</option>
+                <option value="anxious-preoccupied">Anxious-Preoccupied</option>
+                <option value="dismissive-avoidant">Dismissive-Avoidant</option>
+                <option value="fearful-avoidant">Fearful-Avoidant</option>
+            </select>
+        </div>
+
+        <!-- Intel -->
+        <div class="section-title">INTEL</div>
+        <div class="intel-grid" id="intel"></div>
+
+        <!-- Game Plan -->
+        <div class="section-title">GAME PLAN</div>
+        <div id="game-plan"></div>
+
+        <!-- Moves -->
+        <div class="section-title">NEXT MOVES</div>
+        <div class="advice-panel" id="moves"></div>
+
+        <!-- Quests -->
+        <div class="section-title">QUEST OBJECTIVES</div>
+        <div class="advice-panel" id="advice"></div>
+    </div>
+
+    <!-- Contact Settings -->
+    <div class="section-title">CONTACT SETTINGS</div>
+    <div class="settings-panel" id="contact-settings">
+        <div class="settings-row">
+            <label>Gender</label>
+            <select id="contact-gender" class="attachment-select" onchange="setGender()">
+                <option value="auto">Auto-detect</option>
+                <option value="he/him">He/Him</option>
+                <option value="she/her">She/Her</option>
+                <option value="they/them">They/Them</option>
+            </select>
+        </div>
+        <div class="settings-row">
+            <label>Category</label>
+            <select id="contact-category" class="attachment-select" onchange="setCategory()">
+                <option value="auto">Auto-detect</option>
+                <option value="romantic_interest">Romantic Interest</option>
+                <option value="casual_interest">Casual Interest</option>
+                <option value="close_friend">Close Friend</option>
+                <option value="new_friend">New Friend</option>
+                <option value="coworker">Coworker</option>
+                <option value="family_parent">Parent</option>
+                <option value="family_sibling">Sibling</option>
+                <option value="ex">Ex</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="settings-row">
+            <label>Context Notes</label>
+            <textarea id="context-notes" class="journal-textarea" style="min-height:80px; margin-bottom:8px;"
+                placeholder="Describe your relationship with this person, what you want from this connection, any context the AI should know..."></textarea>
+            <button class="btn" onclick="saveContextNotes()" style="margin-top:4px;">SAVE NOTES</button>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-top:16px;">
+        <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+            <button class="btn pink" onclick="runAnalysis()" id="analyze-btn">RUN AI ANALYSIS</button>
+            <button class="btn" onclick="toggleFeedbackInput()" id="refresh-btn" style="display:none;">REFRESH ANALYSIS</button>
+            <button class="btn" id="import-btn-bottom" onclick="importMessages()">RE-IMPORT iMESSAGE</button>
+        </div>
+        <div id="feedback-container" style="display:none; margin-top:16px; max-width:600px; margin-left:auto; margin-right:auto;">
+            <textarea id="analysis-feedback" class="journal-textarea" style="min-height:60px; margin-bottom:8px;"
+                placeholder="Add feedback for the AI... e.g. 'we hung out in person and she was really touchy' or 'focus more on texting frequency' or 'she told me she just got out of a relationship'"></textarea>
+            <div style="display:flex; gap:8px; justify-content:center;">
+                <button class="btn pink" onclick="refreshAnalysis()">RE-ANALYZE WITH FEEDBACK</button>
+                <button class="btn" onclick="refreshAnalysis()">RE-ANALYZE (NO FEEDBACK)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thinking Sidebar -->
+<div id="thinking-sidebar" class="thinking-sidebar">
+    <div class="thinking-sidebar-header">
+        <div class="thinking-sidebar-title">
+            <span class="thinking-pulse"></span>
+            <span>NEURAL PROCESSING</span>
+        </div>
+        <button class="thinking-sidebar-close" onclick="dismissThinkingSidebar()">&times;</button>
+    </div>
+    <div class="thinking-sidebar-step" id="thinking-step">
+        <div class="thinking-step-label" id="thinking-step-label">INITIALIZING</div>
+        <div class="thinking-step-detail" id="thinking-step-detail">Waiting to start...</div>
+        <div class="thinking-progress-bar">
+            <div class="thinking-progress-fill" id="thinking-progress-fill" style="width:0%"></div>
+        </div>
+        <div class="thinking-pct" id="thinking-pct">0%</div>
+    </div>
+    <div class="thinking-sidebar-log" id="thinking-log">
+        <!-- Entries appended dynamically -->
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
